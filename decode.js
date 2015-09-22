@@ -16,18 +16,18 @@
     intermediateFileSize = 0,
 
     pixelsBuffer = null,
-    alteredPixelsBuffer = null,
 
     message = '',
 
     getRGBFileStats = null,
     getRGBFileBytes = null,
-    processRGBFileBytes = null;
+    processRGBFileBytes = null,
+    printRetrievedMessage = null;
 
   getRGBFileStats = function(){
     fs.stat(intermediateFile, function(statError, stats){
       if(statError !== null){
-        console.error('Unable to get destination file statistics.');
+        console.error('Unable to get intermediate file statistics.');
         console.error(statError);
         process.exit(1);
         return;
@@ -40,7 +40,6 @@
   getRGBFileBytes = function(){
     fs.open(intermediateFile, 'r', function(openError, fileDescriptor){
       pixelsBuffer = new Buffer(intermediateFileSize);
-      alteredPixelsBuffer = new Buffer(intermediateFileSize);
       if(openError !== null){
         console.error('Unable to open intermediate file.');
         console.error(openError);
@@ -75,7 +74,7 @@
       redValue = 0,
       greenValue = 0,
       blueValue = 0,
-      characterToEncode = null;
+      retrievedCharacter = null;
     while(pixelByteIndex < pixelsBufferLength){
       redValue = pixelsBuffer.readUInt8(pixelByteIndex + redValueOffset);
       greenValue = pixelsBuffer.readUInt8(pixelByteIndex + greenValueOffset);
@@ -84,26 +83,22 @@
       console.log(util.format('R: %d', redValue));
       console.log(util.format('G: %d', greenValue));
       console.log(util.format('B: %d', blueValue));
-      characterToEncode = message.charCodeAt(pixelIndex % message.length);
-      redValue = (redValue >> 3) << 3;
-      greenValue = (greenValue >> 3) << 3;
-      blueValue = (blueValue >> 2) << 2;
-      redValue += (characterToEncode & 0b11100000) >> 5;
-			greenValue += (characterToEncode & 0b00011100) >> 2;
-			blueValue += (characterToEncode & 0b00000011);
-      console.log(util.format('R0: %d', redValue));
-      console.log(util.format('G0: %d', greenValue));
-      console.log(util.format('B0: %d', blueValue));
-      alteredPixelsBuffer.writeUInt8(
-        redValue, pixelByteIndex + redValueOffset);
-      alteredPixelsBuffer.writeUInt8(
-        greenValue, pixelByteIndex + greenValueOffset);
-      alteredPixelsBuffer.writeUInt8(
-        blueValue, pixelByteIndex + blueValueOffset);
+      redValue = redValue & 0b00000111;
+			greenValue = greenValue & 0b00000111;
+			blueValue = blueValue & 0b00000011;
+      retrievedCharacter =
+        String.fromCharCode((redValue << 5) + (greenValue << 2) + blueValue);
+      message += retrievedCharacter;
       pixelIndex += 1;
       pixelByteIndex += 3;
     }
-    process.nextTick(writeRGBFileBytes);
+    process.nextTick(printRetrievedMessage);
+  };
+
+  printRetrievedMessage = function(){
+    console.log('Retrieved the following message:');
+    console.log(message);
+    process.exit(0);
   };
 
   (function(){
