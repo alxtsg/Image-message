@@ -33,7 +33,7 @@
   getRGBFileStats = function(){
     fs.stat(intermediateFile, function(statError, stats){
       if(statError !== null){
-        console.error('Unable to get destination file statistics.');
+        console.error('Unable to get intermediate file statistics.');
         console.error(statError);
         process.exit(1);
         return;
