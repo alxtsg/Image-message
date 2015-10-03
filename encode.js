@@ -1,4 +1,7 @@
-(function(){
+/**
+ * Encode image and embed message in the image.
+ */
+(function () {
 
   'use strict';
 
@@ -30,9 +33,12 @@
     writeRGBFileBytes = null,
     convertRGBFileBytesToPNG = null;
 
-  getRGBFileStats = function(){
-    fs.stat(intermediateFile, function(statError, stats){
-      if(statError !== null){
+  /**
+   * Gets RGB file statistics.
+   */
+  getRGBFileStats = function () {
+    fs.stat(intermediateFile, function (statError, stats) {
+      if (statError !== null) {
         console.error('Unable to get intermediate file statistics.');
         console.error(statError);
         process.exit(1);
@@ -43,11 +49,14 @@
     });
   };
 
-  getRGBFileBytes = function(){
-    fs.open(intermediateFile, 'r', function(openError, fileDescriptor){
+  /**
+   * Gets content, in bytes, of the RGB file.
+   */
+  getRGBFileBytes = function () {
+    fs.open(intermediateFile, 'r', function (openError, fileDescriptor) {
       pixelsBuffer = new Buffer(intermediateFileSize);
       alteredPixelsBuffer = new Buffer(intermediateFileSize);
-      if(openError !== null){
+      if (openError !== null) {
         console.error('Unable to open intermediate file.');
         console.error(openError);
         process.exit(1);
@@ -58,8 +67,8 @@
         0,
         intermediateFileSize,
         null,
-        function(readError){
-          if(readError !== null){
+        function (readError) {
+          if (readError !== null) {
             console.error('Unable to read intermediate file.');
             console.error(readError);
             process.exit(1);
@@ -71,7 +80,10 @@
     });
   };
 
-  processRGBFileBytes = function(){
+  /**
+   * Processes data bytes from the RGB file.
+   */
+  processRGBFileBytes = function () {
     var pixelIndex = 0,
       pixelByteIndex = 0,
       redValueOffset = 0,
@@ -82,7 +94,7 @@
       greenValue = 0,
       blueValue = 0,
       characterToEncode = null;
-    while(pixelByteIndex < pixelsBufferLength){
+    while (pixelByteIndex < pixelsBufferLength) {
       redValue = pixelsBuffer.readUInt8(pixelByteIndex + redValueOffset);
       greenValue = pixelsBuffer.readUInt8(pixelByteIndex + greenValueOffset);
       blueValue = pixelsBuffer.readUInt8(pixelByteIndex + blueValueOffset);
@@ -95,8 +107,8 @@
       greenValue = (greenValue >> 3) << 3;
       blueValue = (blueValue >> 2) << 2;
       redValue += (characterToEncode & 0b11100000) >> 5;
-			greenValue += (characterToEncode & 0b00011100) >> 2;
-			blueValue += (characterToEncode & 0b00000011);
+      greenValue += (characterToEncode & 0b00011100) >> 2;
+      blueValue += (characterToEncode & 0b00000011);
       console.log(util.format('R0: %d', redValue));
       console.log(util.format('G0: %d', greenValue));
       console.log(util.format('B0: %d', blueValue));
@@ -112,9 +124,12 @@
     process.nextTick(writeRGBFileBytes);
   };
 
-  writeRGBFileBytes = function(){
-    fs.open(alteredFile, 'w', function(openError, fileDescriptor){
-      if(openError !== null){
+  /**
+   * Writes altered image to a file.
+   */
+  writeRGBFileBytes = function () {
+    fs.open(alteredFile, 'w', function (openError, fileDescriptor) {
+      if (openError !== null) {
         console.error('Unable to open altered file.');
         console.error(openError);
         process.exit(1);
@@ -125,8 +140,8 @@
         0,
         alteredPixelsBuffer.length,
         null,
-        function(writeError){
-          if(writeError !== null){
+        function (writeError) {
+          if (writeError !== null) {
             console.error('Unable to write altered file.');
             console.error(writeError);
             process.exit(1);
@@ -138,7 +153,10 @@
     });
   };
 
-  convertRGBFileBytesToPNG = function(){
+  /**
+   * Converts RGB file to PNG.
+   */
+  convertRGBFileBytesToPNG = function () {
     var commandArguments = [
         'convert',
         '-size',
@@ -147,13 +165,13 @@
         destinationFile
       ],
       gm = spawn(gmPath, commandArguments);
-    gm.on('error', function(error){
+    gm.on('error', function (error) {
       console.error('Unable to convert image.');
       console.error(error);
       process.exit(1);
     });
-    gm.on('close', function(code){
-      if(code !== 0){
+    gm.on('close', function (code) {
+      if (code !== 0) {
         console.error(util.format('GraphicsMagick exit with code %d.', code));
         process.exit(1);
         return;
@@ -162,20 +180,20 @@
     });
   };
 
-  (function(){
+  (function () {
     var commandArguments = [
         'convert',
         sourceFile,
         intermediateFile
       ],
       gm = spawn(gmPath, commandArguments);
-    gm.on('error', function(error){
+    gm.on('error', function (error) {
       console.error('Unable to convert image.');
       console.error(error);
       process.exit(1);
     });
-    gm.on('close', function(code){
-      if(code !== 0){
+    gm.on('close', function (code) {
+      if (code !== 0) {
         console.error(util.format('GraphicsMagick exit with code %d.', code));
         process.exit(1);
         return;

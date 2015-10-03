@@ -1,4 +1,7 @@
-(function(){
+/**
+ * Decode image and extract message embedded in the image.
+ */
+(function () {
 
   'use strict';
 
@@ -24,9 +27,12 @@
     processRGBFileBytes = null,
     printRetrievedMessage = null;
 
-  getRGBFileStats = function(){
-    fs.stat(intermediateFile, function(statError, stats){
-      if(statError !== null){
+  /**
+   * Gets RGB file statistics.
+   */
+  getRGBFileStats = function () {
+    fs.stat(intermediateFile, function (statError, stats) {
+      if (statError !== null) {
         console.error('Unable to get intermediate file statistics.');
         console.error(statError);
         process.exit(1);
@@ -37,10 +43,13 @@
     });
   };
 
-  getRGBFileBytes = function(){
-    fs.open(intermediateFile, 'r', function(openError, fileDescriptor){
+  /**
+   * Gets content, in bytes, of the RGB file.
+   */
+  getRGBFileBytes = function () {
+    fs.open(intermediateFile, 'r', function (openError, fileDescriptor) {
       pixelsBuffer = new Buffer(intermediateFileSize);
-      if(openError !== null){
+      if (openError !== null) {
         console.error('Unable to open intermediate file.');
         console.error(openError);
         process.exit(1);
@@ -51,8 +60,8 @@
         0,
         intermediateFileSize,
         null,
-        function(readError){
-          if(readError !== null){
+        function (readError) {
+          if (readError !== null) {
             console.error('Unable to read intermediate file.');
             console.error(readError);
             process.exit(1);
@@ -64,7 +73,10 @@
     });
   };
 
-  processRGBFileBytes = function(){
+  /**
+   * Processes data bytes from the RGB file.
+   */
+  processRGBFileBytes = function () {
     var pixelIndex = 0,
       pixelByteIndex = 0,
       redValueOffset = 0,
@@ -75,7 +87,7 @@
       greenValue = 0,
       blueValue = 0,
       retrievedCharacter = null;
-    while(pixelByteIndex < pixelsBufferLength){
+    while (pixelByteIndex < pixelsBufferLength) {
       redValue = pixelsBuffer.readUInt8(pixelByteIndex + redValueOffset);
       greenValue = pixelsBuffer.readUInt8(pixelByteIndex + greenValueOffset);
       blueValue = pixelsBuffer.readUInt8(pixelByteIndex + blueValueOffset);
@@ -84,8 +96,8 @@
       console.log(util.format('G: %d', greenValue));
       console.log(util.format('B: %d', blueValue));
       redValue = redValue & 0b00000111;
-			greenValue = greenValue & 0b00000111;
-			blueValue = blueValue & 0b00000011;
+      greenValue = greenValue & 0b00000111;
+      blueValue = blueValue & 0b00000011;
       retrievedCharacter =
         String.fromCharCode((redValue << 5) + (greenValue << 2) + blueValue);
       message += retrievedCharacter;
@@ -95,26 +107,29 @@
     process.nextTick(printRetrievedMessage);
   };
 
-  printRetrievedMessage = function(){
+  /**
+   * Prints the message retrieved from the image.
+   */
+  printRetrievedMessage = function () {
     console.log('Retrieved the following message:');
     console.log(message);
     process.exit(0);
   };
 
-  (function(){
+  (function () {
     var commandArguments = [
         'convert',
         sourceFile,
         intermediateFile
       ],
       gm = spawn(gmPath, commandArguments);
-    gm.on('error', function(error){
+    gm.on('error', function (error) {
       console.error('Unable to convert image.');
       console.error(error);
       process.exit(1);
     });
-    gm.on('close', function(code){
-      if(code !== 0){
+    gm.on('close', function (code) {
+      if (code !== 0) {
         console.error(util.format('GraphicsMagick exit with code %d.', code));
         process.exit(1);
         return;
