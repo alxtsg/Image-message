@@ -10,6 +10,8 @@ This is a prototype based on the work from the following:
 
 Obviously this is not for production use.
 
+**This project is no longer being maintained.**
+
 ## Requirements ##
 
 * Node.js (`>=4.1.1`).
@@ -19,11 +21,15 @@ Obviously this is not for production use.
 
 0. Install Node.js.
 1. Install GraphicsMagick.
-2. Run `encode.js` to encode message into an image and `decode.js` to decode message from an image.
+2. Run `encode.js` to encode message into an image and `decode.js` to decode
+   message from an image.
 
 ## Usage ##
 
-Check and make modifications to `encode.js` and `decode.js`, otherwise both programs are very likely not going to work. A lot of assumptions were being made when coding this prototype, including the path and dimension of the original image.
+Check and make modifications to `encode.js` and `decode.js`, otherwise both
+programs are very likely not going to work. A lot of assumptions were being made
+when coding this prototype, including the path and dimension of the original
+image.
 
 ## License ##
 
